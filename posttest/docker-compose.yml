@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16.2-alpine3.19
+#    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345678
+      POSTGRES_DB: DATABASE_URL
+    ports:
+      - "5432:5432"
+    networks:
+      - spring-postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "8888:8888"
+#    restart: always
+    depends_on:
+      - postgres
+    networks:
+      - spring-postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/DATABASE_URL
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 12345678
+
+volumes:
+  postgres-data:
+
+networks:
+  spring-postgres:
