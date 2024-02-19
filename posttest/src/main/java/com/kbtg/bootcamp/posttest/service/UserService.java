@@ -16,5 +16,5 @@ public interface UserService extends UserDetailsService {
 
     ResponseDto createUser(UserDto userDto);
 
-    ResponseDto editUser(UserDto user, Integer id);
+    ResponseDto editUser(UserDto user, String id);
 }

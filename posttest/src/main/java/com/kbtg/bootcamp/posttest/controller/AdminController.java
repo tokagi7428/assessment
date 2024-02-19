@@ -1,13 +1,11 @@
 package com.kbtg.bootcamp.posttest.controller;
 
-import com.kbtg.bootcamp.posttest.dto.LotteryDto;
+import com.kbtg.bootcamp.posttest.dto.TicketDto;
 import com.kbtg.bootcamp.posttest.dto.ResponseDto;
 import com.kbtg.bootcamp.posttest.dto.UserDto;
-import com.kbtg.bootcamp.posttest.service.AdminService;
-import com.kbtg.bootcamp.posttest.service.LotteryService;
+import com.kbtg.bootcamp.posttest.service.TicketService;
 import com.kbtg.bootcamp.posttest.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,13 +14,13 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final LotteryService lotteryService;
+    private final TicketService ticketService;
 
     private final UserService userService;
 
-    public AdminController(UserService userService,LotteryService lotteryService) {
+    public AdminController(UserService userService, TicketService ticketService) {
         this.userService = userService;
-        this.lotteryService = lotteryService;
+        this.ticketService = ticketService;
     }
 
     @GetMapping()
@@ -31,27 +29,27 @@ public class AdminController {
     }
 
     @PostMapping("/lotteries")
-    public ResponseDto createLotteries(@Valid @RequestBody LotteryDto lotteryDto){
-        return lotteryService.createLotteries(lotteryDto);
+    public ResponseDto createLotteries(@Valid @RequestBody TicketDto ticketDto){
+        return ticketService.createLotteries(ticketDto);
     }
 
     @GetMapping("/lotteries")
-    public List<LotteryDto> getAllLotteries(){
-        return lotteryService.getAllLotteries();
+    public List<TicketDto> getAllLotteries(){
+        return ticketService.getAllLotteries();
     }
 
     @PatchMapping("/lottery/{id}")
-    public ResponseDto editLottery(@Valid @RequestBody LotteryDto lotteryDto, @PathVariable Integer id){
-        return lotteryService.editLottery(lotteryDto,id);
+    public ResponseDto editLottery(@Valid @RequestBody TicketDto ticketDto, @PathVariable Integer id){
+        return ticketService.editLottery(ticketDto,id);
     }
 
     @DeleteMapping("/lottery/{id}")
-    public ResponseDto deleteLottery(@Valid @RequestBody LotteryDto lotteryDto, @PathVariable Integer id){
-        return lotteryService.deleteLottery(lotteryDto,id);
+    public ResponseDto deleteLottery(@Valid @RequestBody TicketDto ticketDto, @PathVariable Integer id){
+        return ticketService.deleteLottery(ticketDto,id);
     }
 
     @PatchMapping("/userEdit/{id}")
-    public ResponseDto editUser(@Valid @RequestBody UserDto user, @PathVariable Integer id){
+    public ResponseDto editUser(@Valid @RequestBody UserDto user, @PathVariable String id){
         return userService.editUser(user,id);
     }
 }

@@ -19,7 +19,7 @@ public class UserDto {
 
     private List<String> permissions;
 
-    private Integer id;
+    private String userId;
 
     public UserDto(){}
 

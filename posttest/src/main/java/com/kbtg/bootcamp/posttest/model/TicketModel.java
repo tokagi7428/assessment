@@ -9,10 +9,10 @@ import lombok.Setter;
 
 
 @Entity()
-@Table(name = "lottery")
+@Table(name = "tickets")
 @Getter
 @Setter
-public class LotteryModel {
+public class TicketModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,9 +20,9 @@ public class LotteryModel {
     private Integer id;
 
     @NotBlank
-    @Column(name = "lottery_number")
-    @Size(min = 6, max = 6, message = "Please enter lottery number 6 characters")
-    private String lotteryNumber;
+    @Column(name = "ticket_id")
+    @Size(min = 6, max = 6, message = "Please enter lottery id 6 characters")
+    private String ticketId;
 
     @NotNull
     @Column
@@ -38,6 +38,6 @@ public class LotteryModel {
     @Column
     private String status;
 
-    public LotteryModel(){}
+    public TicketModel(){}
 
 }

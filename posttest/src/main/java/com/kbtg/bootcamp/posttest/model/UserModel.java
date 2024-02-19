@@ -43,7 +43,6 @@ public class UserModel implements UserDetails {
     public UserModel(){}
 
     public UserModel(String username, String password) {
-        this.userId = UUID.randomUUID().toString().substring(0,10);
         this.username = username;
         this.password = password;
     }

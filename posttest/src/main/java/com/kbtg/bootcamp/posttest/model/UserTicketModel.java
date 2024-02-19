@@ -1,13 +1,13 @@
 package com.kbtg.bootcamp.posttest.model;
 
-import com.kbtg.bootcamp.posttest.Enum.TransactionType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Entity
@@ -21,17 +21,22 @@ public class UserTicketModel {
     private Integer id;
 
     @Column(name = "user_id")
+    @Size(min = 10,max = 10)
     private String userId;
 
-    @Column(name = "lottery_id")
-    private Integer lotteryId;
+    @Column(name = "ticket_id")
+    @Size(min = 6,max = 6)
+    private String ticketId;
 
     @Column(name = "transaction_type")
     private String transactionType;
 
-    @Column(name = "transaction_date")
+    @Column(name = "transaction_sell_date")
+    private LocalDateTime transactionSellDate;
+
     @CreationTimestamp
-    private Date transactionDate;
+    @Column(name = "transaction_buy_date")
+    private LocalDateTime transactionBuyDate;
 
     public UserTicketModel() {}
 

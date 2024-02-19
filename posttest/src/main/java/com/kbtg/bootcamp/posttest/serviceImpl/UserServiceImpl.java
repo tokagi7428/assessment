@@ -5,7 +5,7 @@ import com.kbtg.bootcamp.posttest.dto.UserDto;
 import com.kbtg.bootcamp.posttest.exception.BadRequestException;
 import com.kbtg.bootcamp.posttest.exception.NotFoundException;
 import com.kbtg.bootcamp.posttest.model.UserModel;
-import com.kbtg.bootcamp.posttest.repository.LotteryRepository;
+import com.kbtg.bootcamp.posttest.repository.TicketRepository;
 import com.kbtg.bootcamp.posttest.repository.UserRepository;
 import com.kbtg.bootcamp.posttest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private LotteryRepository lotteryRepository;
+    private TicketRepository ticketRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) {
@@ -68,11 +68,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseDto editUser(UserDto user, Integer id) {
-        Optional<UserModel> userModelOpt = userRepository.findById(id);
+    public ResponseDto editUser(UserDto user, String userId) {
+        Optional<UserModel> userModelOpt = userRepository.findByUserId(userId);
         if(userModelOpt.isPresent()) {
             UserModel userModel = userModelOpt.get();
-            userModel.setPassword(user.getPassword());
+//            userModel.setPassword(user.getPassword());
             userModel.setRoles(user.getRoles());
             userModel.setPermissions(user.getPermissions());
             userRepository.save(userModel);
@@ -81,8 +81,8 @@ public class UserServiceImpl implements UserService {
         }
         return new ResponseDto(LocalDateTime.now(),
                 HttpStatus.CREATED.value(),
-                user.getUsername(),
-                "update user successfully"
+                null,
+                "update username : " + user.getUsername() + " successfully!"
         );
     }
 

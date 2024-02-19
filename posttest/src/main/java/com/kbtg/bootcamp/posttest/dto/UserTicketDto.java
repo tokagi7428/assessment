@@ -1,8 +1,7 @@
 package com.kbtg.bootcamp.posttest.dto;
 
-import com.kbtg.bootcamp.posttest.model.LotteryModel;
+import com.kbtg.bootcamp.posttest.model.TicketModel;
 import com.kbtg.bootcamp.posttest.model.UserModel;
-import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
@@ -14,11 +13,13 @@ public class UserTicketDto {
 
     private UserModel user;
 
-    private LotteryModel lottery;
+    private TicketModel lottery;
 
     private String transactionType;
 
-    private Date transactionDate;
+    private Date transactionSellDate;
+
+    private Date transactionBuyDate;
 
     public UserTicketDto() {}
 }

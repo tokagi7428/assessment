@@ -1,22 +1,22 @@
 package com.kbtg.bootcamp.posttest.serviceImpl;
 
-import com.kbtg.bootcamp.posttest.Enum.TransactionType;
 import com.kbtg.bootcamp.posttest.dto.ResponseDto;
 import com.kbtg.bootcamp.posttest.exception.BadRequestException;
-import com.kbtg.bootcamp.posttest.model.LotteryModel;
+import com.kbtg.bootcamp.posttest.model.TicketModel;
 import com.kbtg.bootcamp.posttest.model.UserModel;
 import com.kbtg.bootcamp.posttest.model.UserTicketModel;
-import com.kbtg.bootcamp.posttest.repository.LotteryRepository;
+import com.kbtg.bootcamp.posttest.repository.TicketRepository;
 import com.kbtg.bootcamp.posttest.repository.UserRepository;
 import com.kbtg.bootcamp.posttest.repository.UserTicketRepository;
 import com.kbtg.bootcamp.posttest.service.UserTicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -26,7 +26,7 @@ public class UserTicketServiceImpl implements UserTicketService {
     private UserTicketRepository userTicketRepository;
 
     @Autowired
-    private LotteryRepository lotteryRepository;
+    private TicketRepository ticketRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -34,17 +34,19 @@ public class UserTicketServiceImpl implements UserTicketService {
     @Override
     public ResponseDto getLotteries(String userId) {
 
-        Optional<List<UserTicketModel>> userTicketModelOptional = userTicketRepository.findByUserIdAndStatus(userId,"BUY");
+        Optional<List<UserTicketModel>> userTicketModelOptional = userTicketRepository.findByUserIdAndTransactionalType(userId,"BUY");
+        System.out.println(userTicketModelOptional.isPresent());
         if(userTicketModelOptional.isPresent()) {
             Set<String> userTicketSet = new HashSet<>();
             for (UserTicketModel ticketModel : userTicketModelOptional.get()) {
-                Optional<LotteryModel> lotteryModel = lotteryRepository.findById(ticketModel.getLotteryId());
-                lotteryModel.ifPresent(lottery -> userTicketSet.add(lottery.getLotteryNumber()));
+                userTicketSet.add(ticketModel.getTicketId());
             }
+            Map<String,Set<String>> userTicketMap = new LinkedHashMap<>();
+            userTicketMap.put("tickets", userTicketSet);
             return new ResponseDto(LocalDateTime.now(),
                     HttpStatus.OK.value(),
-                    userTicketSet,
-                    "get user successfully"
+                    userTicketMap,
+                    "get user_ticket successfully"
             );
         }
         throw new BadRequestException("ไม่พบผู้ใช้นี้อยู่ในระบบ");
@@ -52,29 +54,29 @@ public class UserTicketServiceImpl implements UserTicketService {
 
     @Override
     @Transactional
-    public ResponseDto sellLottery(Integer id, String userId, Integer ticketId) {
+    public ResponseDto buyLottery(Integer id, String userId, String ticketId) {
 //        System.out.println(id + " : " + userId + " : " + ticketId);
         Optional<UserModel> userModelOptional = userRepository.findById(id);
-        Optional<LotteryModel> lotteryModelOptional = lotteryRepository.findById(ticketId);
-        if(userModelOptional.isPresent() && lotteryModelOptional.isPresent()){
-            LotteryModel lotteryModel = lotteryModelOptional.get();
+        Optional<TicketModel> lotteryModelOptional = ticketRepository.findByTicketId(ticketId);
+        if(userModelOptional.isPresent() && lotteryModelOptional.isPresent() && userModelOptional.get().getUserId().equals(userId)){
+            TicketModel ticketModel = lotteryModelOptional.get();
             // reduce amount of the lottery number
-            if(lotteryModel.getAmount() - 1 >= 0){
-                lotteryModel.setAmount(lotteryModel.getAmount() - 1);
-                lotteryRepository.save(lotteryModel);
+            if(ticketModel.getAmount() - 1 >= 0){
+                ticketModel.setAmount(ticketModel.getAmount() - 1);
+                ticketRepository.save(ticketModel);
             }else{
                 throw new BadRequestException("จำนวนล็อตเตอรี่ไม่เพียงพอ");
             }
             UserTicketModel userTicketModel = new UserTicketModel();
-            userTicketModel.setLotteryId(lotteryModel.getId());
-            userTicketModel.setUserId(userId);
+            userTicketModel.setTicketId(ticketModel.getTicketId());
+            userTicketModel.setUserId(userModelOptional.get().getUserId());
             userTicketModel.setTransactionType("BUY");
             userTicketRepository.save(userTicketModel);
 
             return new ResponseDto(LocalDateTime.now(),
                     HttpStatus.OK.value(),
                     null,
-                    "bought lottery successfully"
+                    "buy lottery successfully"
             );
         }else{
             throw new BadRequestException("ไม่พบผู้ใช้นี้อยู่ในระบบ หรือ ไม่พบล็อตเตอรี่หมายเลขนี้");
@@ -84,31 +86,31 @@ public class UserTicketServiceImpl implements UserTicketService {
 
     @Override
     @Transactional
-    public ResponseDto soldLottery(String ticketNumber, String userId, Integer ticketId) {
+    public ResponseDto sellLottery(Integer id, String userId, String ticketId) {
         Optional<UserModel> userModelOptional = userRepository.findByUserId(userId);
-        Optional<LotteryModel> lotteryModelOptional = lotteryRepository.findById(ticketId);
-        if(userModelOptional.isPresent() && lotteryModelOptional.isPresent()){
-            Optional<List<UserTicketModel>> userTicketModelOpt = userTicketRepository.findByLotteryIdAndStatus(ticketId, "BUY");
+        Optional<TicketModel> lotteryModelOptional = ticketRepository.findById(id);
+        System.out.println(userModelOptional.isPresent());
+        System.out.println(lotteryModelOptional.isPresent());
+        if(userModelOptional.isPresent() && lotteryModelOptional.isPresent() && lotteryModelOptional.get().getTicketId().equals(ticketId)){
+            Optional<List<UserTicketModel>> userTicketModelOpt = userTicketRepository.findByTicketIdAndStatus(ticketId, "BUY");
             List<UserTicketModel> userTicketModelList = userTicketModelOpt.get();
 
             int priceTicket = 0;
             for(UserTicketModel userTicketModel : userTicketModelList){
-                Optional<LotteryModel> lotteryModel =  lotteryRepository.findById(ticketId);
-                if(lotteryModel.isPresent() && lotteryModel.get().getLotteryNumber().equals(ticketNumber)) {
-                    priceTicket += lotteryModel.get().getPrice();
-                    userTicketModel.setTransactionType("SOLD");
-                    userTicketRepository.save(userTicketModel);
-                }
+                priceTicket += lotteryModelOptional.get().getPrice();
+                userTicketModel.setTransactionType("SELL");
+                userTicketModel.setTransactionSellDate(LocalDateTime.now());
+                userTicketRepository.save(userTicketModel);
             }
 
             Map<String,String> map = new HashMap<String,String>();
-            map.put("ticketId", ticketNumber);
+            map.put("ticketId", ticketId);
             map.put("price", String.valueOf(priceTicket));
 
             return new ResponseDto(LocalDateTime.now(),
                     HttpStatus.OK.value(),
                     map,
-                    "sold lottery successfully"
+                    "sell lottery successfully"
             );
         }else{
             throw new BadRequestException("ไม่พบผู้ใช้นี้อยู่ในระบบ หรือ ไม่พบล็อตเตอรี่หมายเลขนี้");
