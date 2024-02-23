@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface TicketRepository extends JpaRepository<TicketModel,Integer> {
     Optional<TicketModel> findById(Integer id);
 
-    Optional<TicketModel> findByTicketId(String ticket);
+    Optional<TicketModel> findByTicket(String ticket);
 
     @Query(nativeQuery = true, value = "SELECT * FROM tickets WHERE status <> ?1")
     Optional<List<TicketModel>> findAllTicketsNotStatus(String status);

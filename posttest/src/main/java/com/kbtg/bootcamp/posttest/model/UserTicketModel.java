@@ -7,8 +7,6 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "user_ticket")
@@ -25,8 +23,7 @@ public class UserTicketModel {
     private String userId;
 
     @Column(name = "ticket_id")
-    @Size(min = 6,max = 6)
-    private String ticketId;
+    private Integer ticketId;
 
     @Column(name = "transaction_type")
     private String transactionType;

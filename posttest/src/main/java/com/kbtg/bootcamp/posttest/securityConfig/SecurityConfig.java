@@ -2,7 +2,6 @@ package com.kbtg.bootcamp.posttest.securityConfig;
 
 import com.kbtg.bootcamp.posttest.service.UserService;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,6 +38,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/users/**").hasAnyRole("USER","ADMIN")
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(authFilter , BasicAuthenticationFilter.class)

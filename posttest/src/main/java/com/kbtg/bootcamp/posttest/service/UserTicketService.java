@@ -1,11 +1,16 @@
 package com.kbtg.bootcamp.posttest.service;
 
-import com.kbtg.bootcamp.posttest.dto.ResponseDto;
+import com.kbtg.bootcamp.posttest.dto.TicketResponse;
+
+import java.util.List;
+import java.util.Map;
 
 public interface UserTicketService {
-    ResponseDto getLotteries(String userId);
+    Map<String, List<String>> getLotteries(String userId);
 
-    ResponseDto buyLottery(Integer id, String userId, String ticketId);
+    Map<String,String> buyLottery(String userId, Integer ticketId);
 
-    ResponseDto sellLottery(Integer id, String userId, String ticketId);
+    Map<String,String> sellLottery(String userId, Integer ticketId);
+
+    TicketResponse getMyLotteries(String userId);
 }

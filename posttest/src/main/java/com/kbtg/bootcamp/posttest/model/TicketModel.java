@@ -20,9 +20,9 @@ public class TicketModel {
     private Integer id;
 
     @NotBlank
-    @Column(name = "ticket_id")
+    @Column(name = "ticket")
     @Size(min = 6, max = 6, message = "Please enter lottery id 6 characters")
-    private String ticketId;
+    private String ticket;
 
     @NotNull
     @Column

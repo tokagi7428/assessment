@@ -15,12 +15,12 @@ import java.util.List;
 public class GlobalException {
 
     @ExceptionHandler(value = {BadRequestException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseErrorDto handleBadRequestException(BadRequestException notValidException, WebRequest request) {
         return new ResponseErrorDto(
                 LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 notValidException.getMessage(),
                 request.getDescription(false)
         );
@@ -28,7 +28,7 @@ public class GlobalException {
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseErrorDto handleBadRequestException(MethodArgumentNotValidException notValidException, WebRequest request) {
+    public ResponseErrorDto handleMethodArgumentNotValidException(MethodArgumentNotValidException notValidException, WebRequest request) {
         List<String> error = notValidException.getFieldErrors()
                 .stream()
                 .map(f -> f.getField()  + " " + f.getDefaultMessage())
@@ -55,15 +55,4 @@ public class GlobalException {
         );
     }
 
-    @ExceptionHandler(value = {InternalServerException.class})
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseErrorDto handleInternalServerException(InternalServerException internalServerException, WebRequest request) {
-        return new ResponseErrorDto(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                internalServerException.getMessage(),
-                request.getDescription(false)
-        );
-    }
 }

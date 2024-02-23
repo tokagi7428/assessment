@@ -59,14 +59,15 @@ public class AuthFilter extends OncePerRequestFilter {
             if(!encodedPassword){
                 throw new BadRequestException("username or password is not correct");
             }
+
+            if(username != null && !username.equals("") && SecurityContextHolder.getContext().getAuthentication() == null){
+
+                List<GrantedAuthority> authorities = new ArrayList<>(user.get().getAuthorities());
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
 
-        if(username != null && !username.equals("") && SecurityContextHolder.getContext().getAuthentication() == null){
-
-            List<GrantedAuthority> authorities = new ArrayList<>(user.get().getAuthorities());
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-        }
         filterChain.doFilter(request,response);
 
 

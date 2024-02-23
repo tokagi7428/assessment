@@ -14,9 +14,15 @@ public interface UserTicketRepository extends JpaRepository<UserTicketModel, Int
     @Query(nativeQuery = true, value = "SELECT * FROM user_ticket")
     Optional<List<UserTicketModel>> findByUserId(String userId);
 
-    @Query(nativeQuery = true, value = "SELECT * FROM user_ticket where ticket_id = ?1 and transaction_type = ?2")
-    Optional<List<UserTicketModel>> findByTicketIdAndStatus(String ticketId, String buy);
+    @Query(nativeQuery = true, value = "SELECT * FROM user_ticket where ticket = ?1 and transaction_type = ?2 and user_id = ?3")
+    Optional<List<UserTicketModel>> findByTicketAndStatusAndUserId(String ticketId, String transactionType, String userId);
 
     @Query(nativeQuery = true, value = "SELECT * FROM user_ticket where user_id = ?1 and transaction_type = ?2")
     Optional<List<UserTicketModel>> findByUserIdAndTransactionalType(String userId, String transactionType);
+
+    @Query(nativeQuery = true, value = "SELECT * FROM user_ticket where id = ?1 and transaction_type = ?2 and user_id = ?3")
+    Optional<UserTicketModel> findByIdAndTransactionalTypeAndUserId(Integer id, String transactionType, String userId);
+
+    @Query(nativeQuery = true, value = "SELECT * FROM user_ticket where ticket_id = ?1 and transaction_type = ?2 and user_id = ?3")
+    Optional<List<UserTicketModel>> findByTicketIdAndTransactionalTypeAndUserId(Integer ticketId, String buy, String userId);
 }

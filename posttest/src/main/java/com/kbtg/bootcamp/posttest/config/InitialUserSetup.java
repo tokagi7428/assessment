@@ -31,6 +31,5 @@ public class InitialUserSetup implements ApplicationRunner {
 
             userRepository.save(userModel);
         }
-
     }
 }

@@ -9,7 +9,7 @@ import static org.hamcrest.core.Is.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kbtg.bootcamp.posttest.dto.TicketDto;
-import com.kbtg.bootcamp.posttest.dto.ResponseDto;
+import com.kbtg.bootcamp.posttest.dto.TicketRequestDto;
 import com.kbtg.bootcamp.posttest.dto.UserDto;
 import com.kbtg.bootcamp.posttest.service.TicketService;
 import com.kbtg.bootcamp.posttest.service.UserService;
@@ -19,13 +19,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 class AdminControllerTest {
@@ -47,7 +48,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("when perform on GET: /admin should return Hello admin!")
+    @DisplayName("when perform on GETMapping: /admin/ should return Hello admin!")
     void shouldReturnHello() throws Exception {
         mockMvc.perform(get("/admin"))
                 .andExpect(jsonPath("$", is("Hello admin!")))
@@ -55,43 +56,37 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("when perform on Post: /lotteries should return responseDto!")
+    @DisplayName("when perform on PostMapping: /admin/lotteries should be return return username!")
     void createLotteries() throws Exception {
         // Create a lottery
-        TicketDto ticketDto = new TicketDto();
+        TicketRequestDto ticketDto = new TicketRequestDto();
         ticketDto.setPrice(100);
         ticketDto.setAmount(10);
-        ticketDto.setTicketId("000001");
+        ticketDto.setTicket("000001");
 
-        ResponseDto responseDto = new ResponseDto(
-                any(),
-                HttpStatus.CREATED.value(),
-                "000001",
-                "create lottery successfully"
-        );
-        when(ticketService.createLotteries(ticketDto)).thenReturn(responseDto);
+        Map<String,String> mapTicket = new HashMap<>();
+        mapTicket.put("ticket", ticketDto.getTicket());
+        when(ticketService.createLotteries(ticketDto)).thenReturn(mapTicket);
 
         // Perform the POST request
         mockMvc.perform(post("/admin/lotteries")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(asJsonString(ticketDto)))
-//                .andExpect(jsonPath("$.timestamp", is(LocalDateTime.now())))
-                .andExpect(jsonPath("$.status", is(201)))
-                .andExpect(jsonPath("$.data", is("000001")))
-                .andExpect(jsonPath("$.message", is("create lottery successfully")))
-                .andExpect(status().isOk());
+                .andExpect(jsonPath("$.ticket", is("000001")))
+                .andExpect(content().json(asJsonString(mapTicket)))
+                .andExpect(status().isCreated());
     }
 
 
 
     @Test
-    @DisplayName("when perform on Post: /lotteries should return list!")
+    @DisplayName("when perform on GetMapping: /admin/lotteries should be return List of ticketDto!")
     void getAllLotteries() throws Exception {
         // get ALL the lotteries
         List<TicketDto> list = new ArrayList<TicketDto>();
         TicketDto ticketDto1 = new TicketDto();
-        ticketDto1.setTicketId("000001");
+        ticketDto1.setTicket("000001");
         ticketDto1.setAmount(10);
         ticketDto1.setPrice(80);
         ticketDto1.setId(1);
@@ -99,7 +94,7 @@ class AdminControllerTest {
         ticketDto1.setActive(true);
 
         TicketDto ticketDto2 = new TicketDto();
-        ticketDto2.setTicketId("000002");
+        ticketDto2.setTicket("000002");
         ticketDto2.setAmount(20);
         ticketDto2.setPrice(80);
         ticketDto2.setId(2);
@@ -112,7 +107,7 @@ class AdminControllerTest {
 
         // Perform the Get request
         mockMvc.perform(get("/admin/lotteries"))
-                .andExpect(jsonPath("$[0].ticketId").value("000001")) // Use matchers for JSON path
+                .andExpect(jsonPath("$[0].ticket").value("000001")) // Use matchers for JSON path
                 .andExpect(jsonPath("$[0].price").value(80))
                 .andExpect(jsonPath("$[0].amount").value(10))
                 .andExpect(jsonPath("$[0].status").value("ACTIVE"))
@@ -122,85 +117,28 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("when performing PATCH on /lottery/1 should return ResponseDto")
-    public void editLottery() throws Exception {
-        // edit a lottery
-        TicketDto ticketDto = new TicketDto();
-        ticketDto.setId(1);
-        ticketDto.setPrice(100);
-        ticketDto.setAmount(10);
-        ticketDto.setActive(true);
-        ticketDto.setTicketId("000001");
-        ticketDto.setStatus("Active");
-
-        // Mock the service method to return a response
-        ResponseDto responseDto = new ResponseDto(null, HttpStatus.OK.value(), ticketDto, "Update lottery successfully");
-        when(ticketService.editLottery(eq(ticketDto), eq(1))).thenReturn(responseDto);
-
-        // Perform the PATCH request
-        mockMvc.perform(patch("/admin/lottery/{id}",1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(ticketDto)))
-                // Verify the response
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.data.id").value(1))
-                .andExpect(jsonPath("$.data.price").value(100))
-                .andExpect(jsonPath("$.data.amount").value(10))
-                .andExpect(jsonPath("$.data.active").value(true))
-                .andExpect(jsonPath("$.data.status").value("Active"))
-                .andExpect(jsonPath("$.message").value("Update lottery successfully"));
-    }
-
-
-
-    @Test
-    @DisplayName("when perform on DeleteMapping: /lottery/{id} should return ResponseDto!")
-    public void deleteLottery() throws Exception {
-
-        // delete a lottery
-        TicketDto ticketDto = new TicketDto();
-        ticketDto.setId(1);
-        ticketDto.setPrice(100);
-        ticketDto.setAmount(10);
-        ticketDto.setStatus("ACTIVE");
-        ticketDto.setTicketId("000001");
-        ticketDto.setActive(true);
-
-        // Mock the service method to return a response
-        ResponseDto responseDto = new ResponseDto(null, HttpStatus.OK.value(), null, "deleted this ticket : " + ticketDto.getTicketId() + " successfully");
-        when(ticketService.deleteLottery(eq(ticketDto), eq(1))).thenReturn(responseDto);
-
-        // Perform the DELETE request
-        mockMvc.perform(delete("/admin/lottery/{id}",1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(ticketDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
-                .andExpect(jsonPath("$.message").value("deleted this ticket : " + ticketDto.getTicketId() + " successfully"));
-    }
-
-    @Test
-    @DisplayName("when perform on PatchMapping: /userEdit/{userId} should return ResponseDto!")
+    @DisplayName("when perform on PutMapping: /admin/userEdit/{id} should return username!")
     public void editUser() throws Exception {
         // set userDto
         UserDto userDto = new UserDto();
-        userDto.setUserId("abc123");
+        userDto.setId(1);
+        userDto.setUserId("abcde12356");
         userDto.setUsername("user");
         userDto.setPassword("1234");
         userDto.setRoles(List.of("ACCOUNTING","USER"));
         userDto.setPermissions(List.of("READ", "WRITE","EDIT"));
 
-        ResponseDto responseDto = new ResponseDto(null, HttpStatus.OK.value(), null, "update username : " + userDto.getUsername() + " successfully!");
-        when(userService.editUser(eq(userDto), eq("abc123"))).thenReturn(responseDto);
+        Map<String,String> mapUsername = new HashMap<>();
+        mapUsername.put("username", userDto.getUsername());
+        when(userService.editUser(eq(userDto), eq("abc123"))).thenReturn(mapUsername);
 
         // Perform the edit request
         mockMvc.perform(patch("/admin/userEdit/{id}","abc123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(userDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status",is(HttpStatus.OK.value())))
-                .andExpect(jsonPath("$.message").value("update username : " + userDto.getUsername() + " successfully!"));
+                .andExpect(content().json(asJsonString(mapUsername)))
+                .andExpect(jsonPath("$.username",is("user")));
     }
 
     // convert object to json
