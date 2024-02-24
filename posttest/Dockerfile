@@ -9,6 +9,7 @@ ADD . .
 # install gradle and build .jar
 RUN chmod +x gradlew
 RUN ./gradlew wrapper
+RUN ./gradlew clean
 RUN ["./gradlew","bootJar"]
 
 # Expose the port your application runs on
